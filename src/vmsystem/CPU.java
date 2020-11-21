@@ -2,7 +2,10 @@ package vmsystem;
 
 import java.util.HashMap;
 
+import io_bus.IOBus;
 import libcalc.TernUtil;
+import memory.LongStack;
+import memory.RAM;
 import vmsystem.Opcodes.Op;
 
 public class CPU {
@@ -268,46 +271,227 @@ public class CPU {
 				}
 		);
 		
+		//datawrite 2
+		opcodes.put(-9495L, 
+				data -> {
+					ram.writeData(data, reg2);
+				}
+		);
+		
+		//instwrite 1
+		opcodes.put(-9494L, 
+				data -> {
+					ram.writeInst(data, reg1);
+				}
+		);
+		//instwrite 2
+		opcodes.put(-9493L, 
+				data -> {
+					ram.writeInst(data, reg2);
+				}
+		);
+
+		//io write1
+		opcodes.put(-9492L, 
+				data -> {
+					iobus.deviceWrite(data, reg1);
+				}
+		);
+		//io write2
+		opcodes.put(-9491L, 
+				data -> {
+					iobus.deviceWrite(data, reg2);
+				}
+		);
+		
+		//io read1
+		opcodes.put(-9490L, 
+				data -> {
+					reg1 = iobus.deviceRead(data);
+				}
+		);
+		//io read2
+		opcodes.put(-9489L, 
+				data -> {
+					reg2 = iobus.deviceRead(data);
+				}
+		);
+		
+		//fopwrite1
+		opcodes.put(-9460L, 
+				data -> {
+					iobus.deviceWrite(fop1, data);
+				}
+		);
+		//fopset1
+		opcodes.put(-9459L, 
+				data -> {
+					fop1 = data;
+				}
+		);
+		
+		//fopwrite2
+		opcodes.put(-9458L, 
+				data -> {
+					iobus.deviceWrite(fop2, data);
+				}
+		);
+		//fopset2
+		opcodes.put(-9457L, 
+				data -> {
+					fop2 = data;
+				}
+		);
+		
+		//fopwrite3
+		opcodes.put(-9456L, 
+				data -> {
+					iobus.deviceWrite(fop3, data);
+				}
+		);
+		//fopset3
+		opcodes.put(-9455L, 
+				data -> {
+					fop3 = data;
+				}
+		);
+		
+		
+		//stack1
+		opcodes.put(-9100L, 
+				data -> {
+					decodeStack(stacks[0], data);
+				}
+		);
+		opcodes.put(-9101L, 
+				data -> {
+					decodeStack(stacks[1], data);
+				}
+		);
+		opcodes.put(-9102L, 
+				data -> {
+					decodeStack(stacks[2], data);
+				}
+		);
+		opcodes.put(-9103L, 
+				data -> {
+					decodeStack(stacks[3], data);
+				}
+		);
+		opcodes.put(-9104L, 
+				data -> {
+					decodeStack(stacks[4], data);
+				}
+		);
+		opcodes.put(-9105L, 
+				data -> {
+					decodeStack(stacks[5], data);
+				}
+		);
+				
+		opcodes.put(-9000L, 
+				data -> {
+					running = false;
+				}
+		);
+
 		
 		opcodes.put(0L, 
 				data -> {
-//					System.out.println("DEBUG: " + reg1 + ", " + reg2);
+					//do nothing
 				}
 		);
+		
+		for(Long l : opcodes.keySet()) opArr[(int) (l + 9841)] = opcodes.get(l);
 	}
 	
-	private long reg1, reg2, data, inst, opcode;
+	private long reg1, reg2, data, inst;
+	
+	private long fop1, fop2, fop3;
+	
 	private long execpoint;
 	private RAM ram;
-	private long[][] stacks;
-	private int[] stackTop;
+	private IOBus iobus;
+	private boolean running = true;
+	private LongStack[] stacks;
 	
-	public CPU(RAM ram) {
+	private final Op[] opArr;
+	
+	public CPU(RAM ram, IOBus iobus) {
+		this.opArr = new Op[19683];
 		initOpcodes();
 		
 		this.reg1 = 1;
 		this.reg2 = 1;
 		this.execpoint = -9841L;
 		this.ram = ram;
+		this.iobus = iobus;
 		
 		this.data = 0;
 		this.inst = 0;
-		this.opcode = 0;
+		this.stacks = new LongStack[] {
+				new LongStack(), new LongStack(), new LongStack(), new LongStack(), new LongStack(), new LongStack()
+		};
 		
-		this.stacks = new long[6][9841];
-		this.stackTop = new int[6];
+		this.fop1 = 0;
+		this.fop2 = 0;
+		this.fop3 = 0;
 	}
 	
+	public void run() {
+		System.out.println("VM start : " + System.currentTimeMillis());
+		long t0 = System.currentTimeMillis();
+		while(running) {
+			cycle();
+		}
+		long t1 = System.currentTimeMillis();
+		System.out.println("VM time   : " + (t1-t0));
+		System.out.println("VM cycles : " + cycles);
+	}
+	long cycles = 0;
 	public void cycle() {
-		
 		this.data = ram.readData(execpoint);
 		this.inst = ram.readInst(execpoint);
 		
-		Op op = opcodes.get(inst);
+		long e = execpoint;
+		Op op = opArr[(int) (inst+9841)];
 		if(op != null) {
 			op.calc(data);
 		}
-		execpoint++;
+		if(e==execpoint) execpoint++;
+		cycles++;
+	}
+	
+	private void decodeStack(LongStack s, long data) {
+		if(data == 0) pop1(s);
+		else if(data == 1) pop2(s);
+		else if(data == 2) push1(s);
+		else if(data == 3) push2(s);
+		else if(data == 4) peek1(s);
+		else if(data == 5) peek2(s);
+		else if(data == 6) invertStack(s);
+	}
+	
+	private void pop1(LongStack s) {
+		this.reg1 = s.pop();
+	}
+	private void pop2(LongStack s) {
+		this.reg2 = s.pop();
+	}
+	private void push1(LongStack s) {
+		s.push(reg1);
+	}
+	private void push2(LongStack s) {
+		s.push(reg2);
+	}
+	private void peek1(LongStack s) {
+		this.reg1 = s.peek();
+	}
+	private void peek2(LongStack s) {
+		this.reg2 = s.peek();
+	}
+	private void invertStack(LongStack s) {
+		s.invert();
 	}
 	
 	@Override

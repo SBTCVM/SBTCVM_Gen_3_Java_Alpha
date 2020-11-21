@@ -120,7 +120,28 @@ public class TernUtil {
 		return sig;
 	}
 	
-	public static void main(String args[]) throws Exception {
-		System.out.println(mostSigTrit(from("++----")));
+	public static String toString(long n) {
+		long num = abs(n);
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+
+		while (num != 0 && i < 12) {
+//			if (num % 3 == 1) out[i] = '+';
+//			else if (num % 3 == 2) out[i] = '-';
+//			else out[i] = '0';
+			
+			if (num % 3 == 1) sb.append(n > 0 ? '+' : '-');
+			else if (num % 3 == 2) sb.append(n > 0 ? '-' : '+');
+			else sb.append('0');
+
+			// 0 is already what the bytes are, so it is ignored
+
+			num = (num + ((num < 0) ? -1 : 1)) / 3; // automatically floored
+
+			i++;
+		}
+		
+		return sb.reverse().toString();
 	}
+	
 }
