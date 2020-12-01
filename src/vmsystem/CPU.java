@@ -198,6 +198,7 @@ public class CPU {
 		opcodes.put(-9600L, 
 				data -> {
 					this.execpoint = data;
+					jmp = true;
 				}
 		);
 		//goto ifequal
@@ -205,6 +206,7 @@ public class CPU {
 				data -> {
 					if(reg1 == reg2) {
 						this.execpoint = data;
+						jmp = true;
 					}
 				}
 		);
@@ -213,6 +215,7 @@ public class CPU {
 				data -> {
 					if(reg1 < reg2) {
 						this.execpoint = data;
+						jmp = true;
 					}
 				}
 		);
@@ -221,6 +224,7 @@ public class CPU {
 				data -> {
 					if(reg1 > reg2) {
 						this.execpoint = data;
+						jmp = true;
 					}
 				}
 		);
@@ -228,12 +232,14 @@ public class CPU {
 		opcodes.put(-9596L, 
 				data -> {
 					this.execpoint = reg1;
+					jmp = true;
 				}
 		);
 		//goto reg2
 		opcodes.put(-9595L, 
 				data -> {
 					this.execpoint = reg2;
+					jmp = true;
 				}
 		);
 		
@@ -413,6 +419,7 @@ public class CPU {
 	private RAM ram;
 	private IOBus iobus;
 	private boolean running = true;
+	private boolean jmp = false;
 	private LongStack[] stacks;
 	
 	private final Op[] opArr;
@@ -449,16 +456,17 @@ public class CPU {
 		System.out.println("VM cycles : " + cycles);
 	}
 	long cycles = 0;
+	long lastexec = 0;
+	long lastlastexec = 0;
 	public void cycle() {
 		this.data = ram.readData(execpoint);
 		this.inst = ram.readInst(execpoint);
-		
-		long e = execpoint;
 		Op op = opArr[(int) (inst+9841)];
 		if(op != null) {
 			op.calc(data);
 		}
-		if(e==execpoint) execpoint++;
+		if(!jmp) execpoint++;
+		jmp = false;
 		cycles++;
 	}
 	

@@ -13,14 +13,24 @@ public class LongQueue {
 	}
 	
 	public void pushEnd(long n) {
-		arr[tail%max] = n;
-		tail = (tail+1)%max;
+		arr[tail] = n;
+		if(tail > max) {
+			tail = 0;
+		}
+		else {
+			tail++;
+		}
 		size++;
 	}
 	public long popFront() {
 		if(size > 0) {
 			long ret = arr[head];
-			head = (head+1)%max;
+			if(head > max) {
+				head = 0;
+			}
+			else {
+				head++;
+			}
 			size--;
 			return ret;
 		}

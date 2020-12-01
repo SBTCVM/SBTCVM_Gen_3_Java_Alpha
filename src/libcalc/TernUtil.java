@@ -126,15 +126,9 @@ public class TernUtil {
 		int i = 0;
 
 		while (num != 0 && i < 12) {
-//			if (num % 3 == 1) out[i] = '+';
-//			else if (num % 3 == 2) out[i] = '-';
-//			else out[i] = '0';
-			
 			if (num % 3 == 1) sb.append(n > 0 ? '+' : '-');
 			else if (num % 3 == 2) sb.append(n > 0 ? '-' : '+');
 			else sb.append('0');
-
-			// 0 is already what the bytes are, so it is ignored
 
 			num = (num + ((num < 0) ? -1 : 1)) / 3; // automatically floored
 
@@ -143,5 +137,4 @@ public class TernUtil {
 		
 		return sb.reverse().toString();
 	}
-	
 }

@@ -6,7 +6,6 @@ public class IOBus {
 	private final ReadNotify[] io_read;
 	private final WriteNotify[] io_write;
 	private final long[] io_data;
-	
 	public IOBus(long size) {
 		io_read = new ReadNotify[(int) size];
 		io_write = new WriteNotify[(int) size];

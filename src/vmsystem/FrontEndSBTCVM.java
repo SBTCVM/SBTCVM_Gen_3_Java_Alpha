@@ -12,6 +12,8 @@ public class FrontEndSBTCVM {
 		IOBus bus = new IOBus((int) TernUtil.mpi());
 		bus.initIO();
 		mem.loadROM(new TROM("C:\\Users\\s650355\\Documents\\CompSci1\\SBTCVM-Gen2-9-master\\SBTCVM-Gen2-9-master\\demos\\tritmap_heavy\\auto_crtsplash.trom"));
+//		mem.loadROM(new TROM("C:\\Users\\s650355\\Documents\\CompSci1\\SBTCVM-Gen2-9-master\\SBTCVM-Gen2-9-master\\roms\\r_stnp_tests\\stnpmegacount.trom"));
+//		mem.loadROM(new TROM("C:\\Users\\s650355\\Documents\\CompSci1\\extreme_count_noprint\\extreme_count.trom"));
 		CPU cpu = new CPU(mem, bus);
 		cpu.run();
 	}

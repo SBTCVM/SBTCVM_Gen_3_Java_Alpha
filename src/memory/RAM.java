@@ -9,10 +9,6 @@ public class RAM {
 	public RAM(int ramSize) {
 		inst = new long[ramSize];
 		data = new long[ramSize];
-		
-		for(int i = 0; i < ramSize; i++) {
-			inst[i] = -9800;
-		}
 	}
 	
 	public void writeData(long address, long data) {
